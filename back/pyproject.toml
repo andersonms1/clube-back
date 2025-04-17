@@ -8,7 +8,12 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "flask (>=3.1.0,<4.0.0)"
+    "flask (>=3.1.0,<4.0.0)",
+    "flask-restful (>=0.3.10,<0.4.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "pydantic (==2.6.3)",
+    "annotated-types (==0.6.0)",
+    "flask-pymongo (>=3.0.1,<4.0.0)",
 ]
 
 

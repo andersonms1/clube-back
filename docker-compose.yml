@@ -1,5 +1,6 @@
 services:
   web:
+    container_name: club-front
     build: 
       context: ./front/
     ports:
@@ -8,21 +9,28 @@ services:
       - ./front:/app
     command: npm run dev
   back:
+    container_name: club-back
     build:
       context: ./back/
     ports:
       - "5000:5000"
     volumes:
       - ./back:/app
+    env_file:
+      - .env
     environment:
       - FLASK_ENV=development
-    command: poetry run flask run --host=0.0.0.0 --port=5000
+    command: poetry run flask run --host=0.0.0.0 --port=5000 --debug
+    depends_on:
+      - mongo
   mongo:
+    container_name: club-database
     image: mongo
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: tasks_manager
 
   mongo-express:
     image: mongo-express
@@ -34,3 +42,14 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
       ME_CONFIG_BASICAUTH: false
+      ME_CONFIG_MONGODB_AUTH_DATABASE: admin 
+    depends_on:
+      - mongo
+  redis:
+    image: redis:7.2-alpine
+    restart: always
+    command: "redis-server --requirepass ${DOCKER_REDIS_PASSWORD}"
+    ports:
+      - "6379:6379"
+    # volumes:
+    #   - "${DOCKER_REDIS_VOLUME_DATA}:/var/lib/redis"
