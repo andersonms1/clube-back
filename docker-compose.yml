@@ -33,6 +33,7 @@ services:
       MONGO_INITDB_DATABASE: tasks_manager
 
   mongo-express:
+    container_name: club-express
     image: mongo-express
     restart: always
     ports:
