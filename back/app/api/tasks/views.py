@@ -22,8 +22,7 @@ class TaskView(Resource):
             try:
                 task = task_service.get_task(task_id)
                 if task:
-                    return task.dict(by_alias=True), 200
-                    return task.dict(by_alias=True), 200
+                    return task, 200
                 return {"message": "Tarefa não encontrada"}, 404
             except InvalidId:
                 return {"message": "ID de tarefa inválido"}, 400

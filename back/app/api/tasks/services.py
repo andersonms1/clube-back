@@ -46,15 +46,28 @@ class TaskService:
         cached_tasks = self.redis.get(cache_key)
 
         if cached_tasks:
-            return {"tasks": eval(cached_tasks)}, 200
+            tasks = eval(
+                str(cached_tasks),
+                {"datetime": datetime, "TaskModel": TaskModel},
+                dict(),
+            )
+            # Buscar a tarefa pelo task_id na lista de tarefas
+            print(f"tasks: {tasks}")
+            for task in tasks:
+                if str(task.get("id", None)) == str(task_id):
+                    return task
 
-        tasks = list(self.collection.find({"user_id": user_id}))
-        print(tasks)
+        tasks = []
+        found_task = None
+        for task in self.collection.find({"user_id": user_id}):
+            task["_id"] = str(task["_id"])
+            tasks.append(TaskModel(**task).model_dump())
+            if str(task_id) == task["_id"]:
+                found_task = task
 
-        task = self.collection.find_one({"_id": ObjectId(task_id)})
-        if task:
-            return TaskModel(**task)
-        return None
+        self.redis.set(cache_key, tasks)
+
+        return found_task
 
     def create_task(self, task: TaskModel):
         task_dict = task.dict(by_alias=True, exclude={"id"})
