@@ -28,6 +28,9 @@ class MongoDB:
             self._client.admin.command('ismaster')
             self._db = self._client[Config.MONGODB_DATABASE]
             logger.info(f"Conexão com MongoDB estabelecida com sucesso: {Config.MONGODB_URI}")
+            for collection in ['tasks', 'users']:
+                if collection not in self._db.list_collection_names():
+                    self._db.create_collection(collection)
         except ConnectionFailure as e:
             logger.error(f"Falha ao conectar ao MongoDB: {str(e)}")
             raise
