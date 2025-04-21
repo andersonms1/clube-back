@@ -25,6 +25,8 @@ class TaskService:
         cached_tasks = self.redis.get(cache_key)
 
         if cached_tasks:
+            print(f"Cached: {cached_tasks}")
+
             return eval(
                 str(cached_tasks),
                 {"datetime": datetime, "TaskModel": TaskModel},
@@ -36,6 +38,7 @@ class TaskService:
             task["_id"] = str(task["_id"])
             tasks.append(TaskModel(**task).model_dump())
 
+        print(f"Tasks: {tasks}")
         self.redis.set(cache_key, tasks)
         return tasks
 
@@ -76,6 +79,13 @@ class TaskService:
         print(f"result: {result}")
         created_task = self.collection.find_one({"_id": result.inserted_id})
         print(f"created_task: {created_task}")
+
+        # Invalidate cache for this user's tasks
+        user_id = task_dict.get("user_id")
+        if user_id:
+            cache_key = f"tasks:{user_id}"
+            self.redis.delete(cache_key)
+
         return TaskModel(**created_task)
 
     def update_task(self, task_id, task_update: TaskUpdateModel):
@@ -87,15 +97,35 @@ class TaskService:
         }
 
         if update_data:
+            # Get the task to find the user_id
+            task = self.collection.find_one({"_id": ObjectId(task_id)})
+
             result = self.collection.update_one(
                 {"_id": ObjectId(task_id)}, {"$set": update_data}
             )
 
-            if result.modified_count:
+            if result.modified_count and task:
+                # Invalidate cache for this user's tasks
+                user_id = task.get("user_id")
+                if user_id:
+                    cache_key = f"tasks:{user_id}"
+                    self.redis.delete(cache_key)
+
                 return self.get_task(task_id)
 
         return None
 
     def delete_task(self, task_id):
+        # Get the task to find the user_id before deleting
+        task = self.collection.find_one({"_id": ObjectId(task_id)})
+
         result = self.collection.delete_one({"_id": ObjectId(task_id)})
+
+        if result.deleted_count > 0 and task:
+            # Invalidate cache for this user's tasks
+            user_id = task.get("user_id")
+            if user_id:
+                cache_key = f"tasks:{user_id}"
+                self.redis.delete(cache_key)
+
         return result.deleted_count > 0

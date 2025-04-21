@@ -4,9 +4,9 @@ from flask_jwt_extended import JWTManager
 from .tasks import views as tasks_routes
 from .users import views as users_routes
 from .auth import views as auth_routes
-from app.infrastructure.database.mongodb import MongoDB
+from app.infrastructure.database.init import init_mongodb
 from app.config import config_by_name
-import redis
+from app.infrastructure.redis.init import init_redis as init_redis_with_config
 
 import logging
 
@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 def create_app(config_name="development"):
     configuration = config_by_name.get(config_name)
     app = Flask(__name__)
+
+    # Set the environment in the app configuration
+    app.config["ENV"] = config_name
 
     mongo = _init_mongodb(app)
     redis_client = init_redis(configuration)
@@ -57,7 +60,12 @@ def _init_mongodb(app):
     """
     try:
         logger.info("Inicializando conexão com MongoDB...")
-        mongodb = MongoDB()
+        # Get the current configuration
+        config_name = app.config.get("ENV", "development")
+        configuration = config_by_name.get(config_name)
+
+        # Initialize MongoDB with the correct configuration
+        mongodb = init_mongodb(configuration)
 
         # Testa a conexão com o banco de dados
         db = mongodb.get_database()
@@ -72,20 +80,18 @@ def _init_mongodb(app):
             raise
 
 
-def init_redis(configuraion):
+def init_redis(configuration):
     """Initialize Redis connection"""
 
     try:
-        # Create a Redis client
-        redis_client = redis.from_url(
-            configuraion.REDIS_URI, password=configuraion.DOCKER_REDIS_PASSWORD
-        )
+        # Initialize Redis with the correct configuration
+        redis_client = init_redis_with_config(configuration).redis_client
 
         # Test connection
         redis_client.ping()
-        logger.info(f"Connected to Redis: {configuraion.REDIS_URI}")
+        logger.info(f"Connected to Redis: {configuration.REDIS_URI}")
 
         return redis_client
-    except redis.ConnectionError as e:
+    except Exception as e:
         logger.error(f"Failed to connect to Redis: {e}")
         raise

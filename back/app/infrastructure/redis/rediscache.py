@@ -2,22 +2,38 @@ import json
 import redis
 from datetime import datetime
 from bson import ObjectId
-from app.config import BaseConfig as Config
 
 
 class RedisCache:
-    _instance = None
+    _instances = {}
+    _config = None
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(RedisCache, cls).__new__(cls)
-            cls._instance.redis_client = redis.from_url(
-                Config.REDIS_URI, password=Config.DOCKER_REDIS_PASSWORD
-            )
-        return cls._instance
+    def __new__(cls, config=None):
+        # Use config as key for the instance to support different environments
+        config_key = id(config) if config else "default"
 
-    def set(self, key, value, expiration=Config.REDIS_EXPIRATION):
+        if config_key not in cls._instances:
+            cls._instances[config_key] = super(RedisCache, cls).__new__(cls)
+            cls._instances[config_key]._config = config
+            cls._instances[config_key]._connect()
+        return cls._instances[config_key]
+
+    def _connect(self):
+        """Establish connection to Redis"""
+        if not self._config:
+            from app.config import BaseConfig
+
+            self._config = BaseConfig
+
+        self.redis_client = redis.from_url(
+            self._config.REDIS_URI, password=self._config.DOCKER_REDIS_PASSWORD
+        )
+
+    def set(self, key, value, expiration=None):
         """Armazena um valor no cache com expiração"""
+        if expiration is None:
+            expiration = self._config.REDIS_EXPIRATION
+
         serialized = json.dumps(value, default=self._json_serializer)
         self.redis_client.setex(key, expiration, serialized)
 

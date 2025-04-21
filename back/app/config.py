@@ -53,13 +53,18 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
 
 
-# class TestingConfig(BaseConfig):
-#     """Testing configuration"""
-#     DEBUG = True
-#     TESTING = True
-#     MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017/task_manager_test")
-#     REDIS_URI = os.getenv("REDIS_URI", "redis://localhost:6379/1")
-#     MAIL_SUPPRESS_SEND = True
+class TestingConfig(BaseConfig):
+    """Testing configuration"""
+
+    DEBUG = True
+    TESTING = True
+    MONGODB_URI = os.getenv(
+        "MONGODB_URI",
+        "mongodb://root:example@mongo:27017/tasks_manager_test?authSource=admin",
+    )
+    MONGODB_DATABASE = "tasks_manager_test"
+    REDIS_URI = os.getenv("REDIS_URI", "redis://redis:6379/1")
+    MAIL_SUPPRESS_SEND = True
 
 
 class ProductionConfig(BaseConfig):
@@ -71,6 +76,6 @@ class ProductionConfig(BaseConfig):
 
 config_by_name = {
     "development": DevelopmentConfig,
-    # "testing": TestingConfig,
+    "testing": TestingConfig,
     "production": ProductionConfig,
 }

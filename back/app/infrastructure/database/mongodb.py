@@ -1,36 +1,51 @@
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 import logging
-from app.config import BaseConfig as Config
 
 logger = logging.getLogger(__name__)
+
 
 class MongoDB:
     """
     Classe de conexão com o MongoDB.
     Implementa o padrão Singleton para garantir apenas uma instância de conexão.
     """
-    _instance = None
+
+    _instances = {}
     _client = None
     _db = None
+    _config = None
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(MongoDB, cls).__new__(cls)
-            cls._instance._connect()
-        return cls._instance
+    def __new__(cls, config=None):
+        # Use config as key for the instance to support different environments
+        config_key = id(config) if config else "default"
+
+        if config_key not in cls._instances:
+            cls._instances[config_key] = super(MongoDB, cls).__new__(cls)
+            cls._instances[config_key]._config = config
+            cls._instances[config_key]._connect()
+        return cls._instances[config_key]
 
     def _connect(self):
         """Estabelece a conexão com o MongoDB"""
         try:
-            self._client = MongoClient(Config.MONGODB_URI, serverSelectionTimeoutMS=5000)
+            if not self._config:
+                from app.config import BaseConfig
+
+                self._config = BaseConfig
+
+            self._client = MongoClient(
+                self._config.MONGODB_URI, serverSelectionTimeoutMS=5000
+            )
             # Verifica se a conexão foi estabelecida
-            self._client.admin.command('ismaster')
-            self._db = self._client[Config.MONGODB_DATABASE]
-            logger.info(f"Conexão com MongoDB estabelecida com sucesso: {Config.MONGODB_URI}")
-            for collection in ['tasks', 'users']:
-                if collection not in self._db.list_collection_names():
-                    self._db.create_collection(collection)
+            self._client.admin.command("ismaster")
+            self._db = self._client[self._config.MONGODB_DATABASE]
+            logger.info(
+                f"Conexão com MongoDB estabelecida com sucesso: {self._config.MONGODB_URI}"
+            )
+            # for collection in ['tasks', 'users']:
+            #     if collection not in self._db.list_collection_names():
+            #         self._db.create_collection(collection)
         except ConnectionFailure as e:
             logger.error(f"Falha ao conectar ao MongoDB: {str(e)}")
             raise

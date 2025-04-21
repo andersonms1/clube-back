@@ -51,6 +51,7 @@ class TaskView(Resource):
                 return updated_task.dict(by_alias=True), 200
             return {"message": "Tarefa não encontrada"}, 404
         except InvalidId:
+            # return {"message": "ID de tarefa inválido"}, 400
             return {"message": "ID de tarefa inválido"}, 400
         except Exception as e:
             return {"message": f"Erro ao atualizar tarefa: {str(e)}"}, 400
