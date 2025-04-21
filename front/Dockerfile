@@ -1,43 +1,35 @@
-# Build Stage 1
-
+# Build Stage
 FROM node:22-alpine AS build
 
 WORKDIR /app
 
-# Enable pnpm
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy package.json and your lockfile, here we add pnpm-lock.yaml for illustration
-# COPY package.json package-lock.json ./
-# COPY package.json ./
-COPY ./package.json /app/
-COPY ./pnpm-lock.yaml /app/
+# Copy package.json and pnpm-lock.yaml
+COPY package.json ./
+COPY pnpm-lock.yaml ./
 
 # Install dependencies
-RUN pnpm install --shamefully-hoist
+RUN pnpm install
 
-# Copy the entire project
-COPY . ./
+# Copy the rest of the application
+COPY . .
 
-# Build the project
-# RUN npm run build
+# Build the application
 RUN pnpm run build
 
+# Production Stage
+FROM nginx:alpine
 
-# Build Stage 2
+# Copy the built app to nginx
+COPY --from=build /app/dist /usr/share/nginx/html
 
-FROM node:22-alpine
-WORKDIR /app
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Only `.output` folder is needed from the build stage
-COPY --from=build /app/.output/ ./
-
-# Change the port and host
-ENV PORT=80
-ENV HOST=0.0.0.0
-
+# Expose port 80
 EXPOSE 80
 
-CMD ["node", "/app/server/index.mjs"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

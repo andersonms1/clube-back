@@ -1,75 +1,79 @@
-# Nuxt Minimal Starter
+# Club Equindim Task Manager Frontend
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A Vue.js frontend for the Club Equindim Task Manager application.
 
-## Setup
+## Features
 
-Make sure to install dependencies:
+- User authentication (login, register, password reset)
+- Task management (create, read, update, delete)
+- Drag and drop interface for task status updates
+- Responsive design for mobile and desktop
+- Modern UI with Quasar components and Tailwind CSS
+
+## Tech Stack
+
+- Vue.js 3 with Composition API
+- TypeScript
+- Pinia for state management
+- Vue Router for routing
+- Quasar Framework for UI components
+- Tailwind CSS for styling
+- Vite for build tooling
+
+## Project Structure
+
+```
+src/
+├── assets/         # Static assets like CSS, images
+├── client/         # API client for backend communication
+├── components/     # Reusable Vue components
+├── composables/    # Vue composables (custom hooks)
+├── router/         # Vue Router configuration
+├── stores/         # Pinia stores for state management
+├── types/          # TypeScript type definitions
+└── views/          # Page components
+```
+
+## Development
+
+### Prerequisites
+
+- Node.js (v16+)
+- pnpm (recommended) or npm
+
+### Setup
+
+1. Install dependencies:
 
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
+2. Create a `.env` file with the following variables:
 
-Start the development server on `http://localhost:3000`:
+```
+VITE_API_URL=http://localhost:5000
+VITE_APP_TITLE=Club Equindim Task Manager
+```
+
+3. Start the development server:
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
-
-Build the application for production:
+### Building for Production
 
 ```bash
-# npm
-npm run build
-
-# pnpm
 pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+## Docker
+
+The application can be run using Docker:
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+docker-compose up -d
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+This will start the frontend, backend, MongoDB, and Redis services.
