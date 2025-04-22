@@ -89,31 +89,20 @@ class TaskService:
         return TaskModel(**created_task)
 
     def update_task(self, task_id, task_update: TaskUpdateModel):
+        if not self.collection.find_one({"_id": ObjectId(task_id)}):
+            return None
+
+        user_id = get_jwt_identity()
         # Remove campos None
         update_data = {
             k: v
             for k, v in task_update.dict(exclude_unset=True).items()
             if v is not None
         }
-
-        if update_data:
-            # Get the task to find the user_id
-            task = self.collection.find_one({"_id": ObjectId(task_id)})
-
-            result = self.collection.update_one(
-                {"_id": ObjectId(task_id)}, {"$set": update_data}
-            )
-
-            if result.modified_count and task:
-                # Invalidate cache for this user's tasks
-                user_id = task.get("user_id")
-                if user_id:
-                    cache_key = f"tasks:{user_id}"
-                    self.redis.delete(cache_key)
-
-                return self.get_task(task_id)
-
-        return None
+        self.collection.update_one({"_id": ObjectId(task_id)}, {"$set": update_data})
+        cache_key = f"tasks:{user_id}"
+        self.redis.delete(cache_key)
+        return self.get_task(task_id)
 
     def delete_task(self, task_id):
         # Get the task to find the user_id before deleting

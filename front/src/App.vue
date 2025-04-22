@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          Club Equindim - Task Manager
+          Club - Task Manager
         </q-toolbar-title>
 
         <div v-if="authStore.isAuthenticated">

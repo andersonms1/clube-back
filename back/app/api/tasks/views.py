@@ -10,6 +10,7 @@ from bson.errors import InvalidId
 from app.api.tasks.models import TaskModel, TaskUpdateModel
 from app.api.tasks.services import TaskService
 from flask_jwt_extended import jwt_required, get_jwt_identity
+import traceback
 
 task_service = TaskService()
 
@@ -38,6 +39,7 @@ class TaskView(Resource):
             created_task = task_service.create_task(task)
             return created_task.model_dump(), 201
         except Exception as e:
+            logger.error(traceback.format_exc())
             return {"message": f"Erro ao criar tarefa: {str(e)}"}, 400
 
     @jwt_required()
@@ -48,12 +50,16 @@ class TaskView(Resource):
             updated_task = task_service.update_task(task_id, task_update)
 
             if updated_task:
-                return updated_task.dict(by_alias=True), 200
+                return updated_task, 200
             return {"message": "Tarefa não encontrada"}, 404
         except InvalidId:
             # return {"message": "ID de tarefa inválido"}, 400
+            logger.error(traceback.format_exc())
+
             return {"message": "ID de tarefa inválido"}, 400
         except Exception as e:
+            logger.error(traceback.format_exc())
+
             return {"message": f"Erro ao atualizar tarefa: {str(e)}"}, 400
 
     @jwt_required()

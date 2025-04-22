@@ -38,7 +38,6 @@ async function fetchApi<T>(
       if (response.status === 401) {
         // Get auth store and handle logout
         const authStore = useAuthStore();
-        // authStore.logout();
         authStore.cleanCredentials();
 
         // Show notification
@@ -52,8 +51,18 @@ async function fetchApi<T>(
         router.push('/login');
       }
 
+      // Extract and format validation error messages
+      let errorMessage = data.message || 'An error occurred';
+
+      // Handle Pydantic validation errors which often come in a specific format
+      if (errorMessage.includes('validation error')) {
+        // Keep the error message as is, as it already contains the validation details
+      } else {
+        // For other types of errors, just use the message as is
+      }
+
       throw {
-        message: data.message || 'An error occurred',
+        message: errorMessage,
         status: response.status,
       } as ApiError;
     }

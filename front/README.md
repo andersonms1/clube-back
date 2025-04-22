@@ -1,6 +1,6 @@
-# Club Equindim Task Manager Frontend
+# Club  Task Manager Frontend
 
-A Vue.js frontend for the Club Equindim Task Manager application.
+A Vue.js frontend for the Club Task Manager application.
 
 ## Features
 
@@ -53,7 +53,7 @@ pnpm install
 
 ```
 VITE_API_URL=http://localhost:5000
-VITE_APP_TITLE=Club Equindim Task Manager
+VITE_APP_TITLE=Club Task Manager
 ```
 
 3. Start the development server:

@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +31,11 @@ class MongoDB:
         """Estabelece a conexão com o MongoDB"""
         try:
             if not self._config:
-                from app.config import BaseConfig
+                from app.config import config_by_name
 
-                self._config = BaseConfig
+                env = os.getenv("ENV", "development")
+                configuration = config_by_name.get(env)
+                self._config = configuration
 
             self._client = MongoClient(
                 self._config.MONGODB_URI, serverSelectionTimeoutMS=5000

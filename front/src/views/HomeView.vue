@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="text-center q-pa-md">
-      <h1 class="text-h3 q-mb-md">Welcome to Club Equindim Task Manager</h1>
+      <h1 class="text-h3 q-mb-md">Welcome to Club Task Manager</h1>
       <p class="text-h6 q-mb-xl">Organize your tasks efficiently and boost your productivity</p>
       
       <div class="row justify-center q-mt-lg">
