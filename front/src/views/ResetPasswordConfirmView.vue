@@ -24,6 +24,8 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores';
 import { ResetPasswordForm } from '@/components';
+import { Notify } from 'quasar';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -45,7 +47,11 @@ async function handleResetPassword(password: string) {
   if (success) {
     authStore.error = null;
     // Show success message
-    alert('Your password has been reset successfully.');
+    Notify.create({
+      type: 'positive',
+      message: 'Your password has been reset successfully.',
+      icon: 'thumb_up'
+    });
     router.push('/login');
   }
 }

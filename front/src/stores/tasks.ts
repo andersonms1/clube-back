@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, toRaw } from 'vue';
 import { tasksApi } from '@/client';
 import { Task, TaskCreate, TaskUpdate, TaskStatus } from '@/types';
 
@@ -8,6 +8,7 @@ export const useTasksStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
+  const editingTask = ref<Task>();
 
   // Getters
   const getTaskById = computed(() => (id: string) => {
@@ -80,7 +81,12 @@ export const useTasksStore = defineStore('tasks', () => {
       tasks.value.push(response);
       return response;
     } catch (err: any) {
-      error.value = err.message || 'Failed to create task';
+      // Extract the validation error message from the Pydantic error
+      if (err.message && err.message.includes('validation error')) {
+        error.value = err.message;
+      } else {
+        error.value = err.message || 'Failed to create task';
+      }
       return null;
     } finally {
       loading.value = false;
@@ -92,7 +98,7 @@ export const useTasksStore = defineStore('tasks', () => {
     error.value = null;
 
     try {
-      const response = await tasksApi.updateTask(id, taskData);
+      const response = await tasksApi.updateTask(editingTask.value.id, taskData);
 
       // Update the task in the tasks array
       const index = tasks.value.findIndex(task => task.id === id);
@@ -102,7 +108,12 @@ export const useTasksStore = defineStore('tasks', () => {
 
       return response;
     } catch (err: any) {
-      error.value = err.message || 'Failed to update task';
+      // Extract the validation error message from the Pydantic error
+      if (err.message && err.message.includes('validation error')) {
+        error.value = err.message;
+      } else {
+        error.value = err.message || 'Failed to update task';
+      }
       return null;
     } finally {
       loading.value = false;
@@ -132,11 +143,20 @@ export const useTasksStore = defineStore('tasks', () => {
     return updateTask(id, { status });
   }
 
+
+  function setEditingTask(task: Task | null) {
+    const newTask = toRaw(task)
+    if (newTask.id) {
+      editingTask.value = task
+    }
+  }
+
   return {
     // State
     tasks,
     loading,
     error,
+    editingTask,
 
     // Getters
     getTaskById,
@@ -144,6 +164,7 @@ export const useTasksStore = defineStore('tasks', () => {
     pendingTasks,
     inProgressTasks,
     completedTasks,
+    setEditingTask,
 
     // Actions
     fetchTasks,

@@ -1,5 +1,13 @@
 <template>
   <q-form @submit="onSubmit" class="q-gutter-md">
+    <!-- Error alert -->
+    <q-banner v-if="errorMessage" class="bg-negative text-white q-mb-md" rounded>
+      {{ errorMessage }}
+      <template v-slot:action>
+        <q-btn flat color="white" label="Dismiss" @click="errorMessage = null" />
+      </template>
+    </q-banner>
+
     <q-input
       v-model="form.titulo"
       label="Title"
@@ -53,8 +61,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch, toRaw } from 'vue';
 import { Task, TaskCreate, TaskUpdate, TaskStatus } from '@/types';
+import { useTasksStore } from '@/stores';
+
+const tasksStore = useTasksStore();
+const errorMessage = ref<string | null>(null);
 
 const props = defineProps<{
   task?: Task| any;
@@ -65,6 +77,11 @@ const emit = defineEmits<{
   (e: 'submit', task: TaskCreate | TaskUpdate): void;
   (e: 'cancel'): void;
 }>();
+
+// Watch for errors in the tasks store
+watch(() => tasksStore.error, (newError) => {
+  errorMessage.value = newError;
+});
 
 const statusOptions = [
   { label: 'Pending', value: 'pending' },
@@ -89,7 +106,6 @@ onMounted(() => {
     form.value.titulo = props.task.titulo;
     form.value.descricao = props.task.descricao;
     form.value.status = props.task.status;
-    
     // Format the date for the date input (YYYY-MM-DD)
     const date = new Date(props.task.data_vencimento);
     form.value.data_vencimento = date.toISOString().split('T')[0];
@@ -100,7 +116,7 @@ function onSubmit() {
   emit('submit', {
     titulo: form.value.titulo,
     descricao: form.value.descricao,
-    status: form.value.status,
+    status: form.value.status.value || form.value.status,
     data_vencimento: new Date(form.value.data_vencimento).toISOString(),
   });
 }

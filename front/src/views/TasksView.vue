@@ -168,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch, toRaw } from 'vue';
 import { useTasksStore } from '@/stores';
 import { useScreenSize } from '@/composables';
 import { useDragDrop } from '@/composables';
@@ -178,7 +178,7 @@ import { Task, TaskCreate, TaskUpdate, TaskStatus } from '@/types';
 const tasksStore = useTasksStore();
 const screenSize = useScreenSize();
 const { draggedTask, onDragStart, onDragEnd, onDrop } = useDragDrop();
-
+const currentID = ref<string>('');
 // For mobile tabs
 const activeTab = ref<TaskStatus>('pending');
 
@@ -190,6 +190,14 @@ const editingTask = ref<Task | null | undefined>(null);
 const deleteDialog = ref(false);
 const taskToDelete = ref<Task | null>(null);
 
+watch(editingTask, (currentTask, previousTask) => {
+  // Prevent undefined by dom event propagation
+  if(toRaw(currentTask)?.id != undefined){
+    currentID.value = toRaw(currentTask)?.id
+  }
+})
+
+
 onMounted(async () => {
   await tasksStore.fetchTasks();
 });
@@ -197,17 +205,28 @@ onMounted(async () => {
 function openTaskDialog(task?: Task) {
   editingTask.value = task || null;
   taskDialog.value = true;
+  tasksStore.setEditingTask(task)
 }
 
 async function handleTaskSubmit(taskData: TaskCreate | TaskUpdate) {
-  if (editingTask.value) {
-    await tasksStore.updateTask(editingTask.value.id, taskData as TaskUpdate);
-  } else {
-    await tasksStore.createTask(taskData as TaskCreate);
+  try {
+    if (editingTask.value) {
+      const result = await tasksStore.updateTask(currentID.value, taskData as TaskUpdate);
+      if (result) {
+        taskDialog.value = false;
+        editingTask.value = null;
+      }
+    } else {
+      const result = await tasksStore.createTask(taskData as TaskCreate);
+      if (result) {
+        taskDialog.value = false;
+        editingTask.value = null;
+      }
+    }
+  } catch (error) {
+    // Form will stay open if there's an error
+    console.error('Task operation failed:', error);
   }
-  
-  taskDialog.value = false;
-  editingTask.value = null;
 }
 
 function confirmDeleteTask(task: Task) {

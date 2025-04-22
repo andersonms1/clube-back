@@ -32,6 +32,7 @@ export interface Task {
 export type TaskStatus = 'pending' | 'in_progress' | 'completed';
 
 export interface TaskCreate {
+  id?: string;
   titulo: string;
   descricao: string;
   status: TaskStatus;
@@ -39,6 +40,7 @@ export interface TaskCreate {
 }
 
 export interface TaskUpdate {
+  id?: string;
   titulo?: string;
   descricao?: string;
   status?: TaskStatus;

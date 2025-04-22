@@ -28,6 +28,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores';
 import { ResetPasswordForm } from '@/components';
+import { Notify } from 'quasar';
 
 const route = useRoute();
 const router = useRouter();
@@ -46,7 +47,12 @@ async function handleResetRequest(email: string) {
     resetSuccess.value = true;
     authStore.error = null;
     // Show success message
-    alert('Password reset link has been sent to your email.');
+    Notify.create({
+      type: 'positive',
+      message: 'Password reset link has been sent to your email.',
+      icon: 'thumb_up'
+    });
+
     router.push('/login');
   }
 }
