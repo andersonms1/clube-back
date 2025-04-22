@@ -2,6 +2,7 @@ import json
 import redis
 from datetime import datetime
 from bson import ObjectId
+import os
 
 
 class RedisCache:
@@ -21,19 +22,20 @@ class RedisCache:
     def _connect(self):
         """Establish connection to Redis"""
         if not self._config:
-            from app.config import BaseConfig
+            from app.config import config_by_name
 
-            self._config = BaseConfig
+            env = os.getenv("ENV", "development")
+            configuration = config_by_name.get(env)
+            self._config = configuration
 
         self.redis_client = redis.from_url(
             self._config.REDIS_URI, password=self._config.DOCKER_REDIS_PASSWORD
         )
 
-    def set(self, key, value, expiration=None):
+    def set(self, key, value, expiration_key="REDIS_EXPIRATION"):
         """Armazena um valor no cache com expiração"""
-        if expiration is None:
-            expiration = self._config.REDIS_EXPIRATION
-
+        # expiration = self._config[expiration_key]
+        expiration = getattr(self._config, expiration_key)
         serialized = json.dumps(value, default=self._json_serializer)
         self.redis_client.setex(key, expiration, serialized)
 

@@ -5,9 +5,13 @@ from flask_restful import Resource
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required
 from bson import ObjectId
 from . import services
-from app.config import BaseConfig as Config
+from .models import PasswordResetModel
 from app.infrastructure.database.mongodb import MongoDB
 from app.infrastructure.redis.rediscache import RedisCache
+import traceback
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class LoginResource(Resource):
@@ -87,6 +91,9 @@ class PasswordResetRequestResource(Resource):
             if not email:
                 return {"message": "Email é obrigatório"}, 400
 
+            # Validar dados com Pydantic
+            user = PasswordResetModel(email=email)
+
             # Buscar usuário no MongoDB
             user = self.collection.find_one({"email": email})
 
@@ -101,11 +108,10 @@ class PasswordResetRequestResource(Resource):
             user_id = str(user["_id"])
 
             # Armazenar token no Redis com TTL
-            self.redis.setex(
-                f"password_reset:{reset_token}",
-                Config.PASSWORD_RESET_EXPIRATION,
-                user_id,
-            )
+            redis_key = f"password_reset:{reset_token}"
+            self.redis.set(redis_key, user_id, "PASSWORD_RESET_TOKEN_EXPIRES")
+
+            return {"reset_token": reset_token}, 200
 
             # Enviar email
             if services.send_password_reset_email(email, reset_token):
@@ -115,6 +121,8 @@ class PasswordResetRequestResource(Resource):
             else:
                 return {"message": "Erro ao enviar email de redefinição"}, 500
         except Exception as e:
+            logger.error(traceback.format_exc())
+
             return {"message": f"Erro ao solicitar redefinição de senha: {str(e)}"}, 500
 
 

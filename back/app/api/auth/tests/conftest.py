@@ -24,7 +24,7 @@ def redis_with_reset_token(redis_cache, test_user, reset_token):
     # Store the reset token in Redis
     redis_cache.setex(
         f"password_reset:{reset_token}",
-        Config.PASSWORD_RESET_EXPIRATION,
+        Config.PASSWORD_RESET_TOKEN_EXPIRES,
         str(test_user.id),
     )
 

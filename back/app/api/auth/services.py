@@ -1,19 +1,26 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from app.config import BaseConfig as Config
+from app.config import config_by_name
+import os
+import traceback
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def send_password_reset_email(to_email, reset_token):
+    env = os.getenv("ENV", "development")
+    configuration = config_by_name.get(env)
     try:
         # Configurar mensagem
         message = MIMEMultipart("alternative")
         message["Subject"] = "Redefinição de Senha"
-        message["From"] = Config.SMTP_USERNAME
+        message["From"] = configuration.MAIL_USERNAME
         message["To"] = to_email
 
         # URL para redefinição de senha
-        reset_url = f"{Config.APP_BASE_URL}/reset-password/{reset_token}"
+        reset_url = f"{configuration.APP_BASE_URL}/reset-password/{reset_token}"
 
         # Criar versão texto e HTML do email
         text = f"""
@@ -50,12 +57,13 @@ def send_password_reset_email(to_email, reset_token):
         message.attach(part2)
 
         # Conectar ao servidor SMTP e enviar email
-        with smtplib.SMTP(Config.SMTP_SERVER, Config.SMTP_PORT) as server:
+        with smtplib.SMTP(configuration.MAIL_SERVER, configuration.MAIL_PORT) as server:
             server.starttls()
-            server.login(Config.SMTP_USERNAME, Config.SMTP_PASSWORD)
-            server.sendmail(Config.SMTP_USERNAME, to_email, message.as_string())
+            server.login(configuration.MAIL_USERNAME, configuration.MAIL_PASSWORD)
+            server.sendmail(configuration.MAIL_USERNAME, to_email, message.as_string())
 
         return True
     except Exception as e:
+        logger.error(traceback.format_exc())
         print(f"Erro ao enviar email: {str(e)}")
         return False
