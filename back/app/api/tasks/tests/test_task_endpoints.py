@@ -17,7 +17,6 @@ class TestTaskEndpoints:
             "descricao": "This is a new test task",
             "status": "pending",
             "data_vencimento": (datetime.now(UTC) + timedelta(days=1)).isoformat(),
-            "user_id": auth_headers["Authorization"].split(" ")[1].split(".")[1],
         }
 
         # Send request to create task
@@ -176,7 +175,6 @@ class TestTaskEndpoints:
             "descricao": "This task should invalidate the cache",
             "status": "pending",
             "data_vencimento": (datetime.now(UTC) + timedelta(days=1)).isoformat(),
-            "user_id": str(test_user.id),
         }
 
         response = client.post(
@@ -221,13 +219,7 @@ class TestTaskEndpoints:
         assert initial_cached_tasks is not None
 
         # Update a task
-        update_data = {
-            "titulo": "Updated Task Title",
-            "status": "completed",
-            "user_id": test_user.id,
-        }
-
-        assert test_task.user_id == test_user.id
+        update_data = {"titulo": "Updated Task Title", "status": "completed"}
         response = client.put(
             f"/api/tasks/{test_task.id}",
             headers=auth_headers,

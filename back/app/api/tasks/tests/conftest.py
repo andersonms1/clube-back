@@ -108,4 +108,13 @@ def test_task(mongodb, test_user):
 
     result = mongodb.get_collection("tasks").insert_one(task_data)
     task_data["_id"] = result.inserted_id
-    return TaskModel(**task_data)
+
+    # Create TaskModel without user_id since it's not in the model
+    model_data = {
+        "_id": task_data["_id"],
+        "titulo": task_data["titulo"],
+        "descricao": task_data["descricao"],
+        "status": task_data["status"],
+        "data_vencimento": task_data["data_vencimento"],
+    }
+    return TaskModel(**model_data)

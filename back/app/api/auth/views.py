@@ -111,8 +111,6 @@ class PasswordResetRequestResource(Resource):
             redis_key = f"password_reset:{reset_token}"
             self.redis.set(redis_key, user_id, "PASSWORD_RESET_TOKEN_EXPIRES")
 
-            return {"reset_token": reset_token}, 200
-
             # Enviar email
             if services.send_password_reset_email(email, reset_token):
                 return {

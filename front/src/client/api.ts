@@ -3,8 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import router from '@/router';
 import { Notify } from 'quasar';
 
-const API_URL = 'http://localhost:5000';
-
+const API_URL = import.meta.env.VITE_API_URL
 /**
  * Generic fetch function with error handling
  */

@@ -20,7 +20,7 @@ def send_password_reset_email(to_email, reset_token):
         message["To"] = to_email
 
         # URL para redefinição de senha
-        reset_url = f"{configuration.APP_BASE_URL}/reset-password/{reset_token}"
+        reset_url = f"{configuration.FRONT_URL}/reset-password/{reset_token}"
 
         # Criar versão texto e HTML do email
         text = f"""
