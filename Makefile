@@ -12,5 +12,3 @@ up-back:
 	docker compose up back mongo redis -d
 up-express:
 	docker compose up mongo-express -d
-test:
-	$(EXEC) $(SERVER_CONTAINER) ./test.sh
