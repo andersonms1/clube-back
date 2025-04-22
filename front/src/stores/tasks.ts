@@ -146,7 +146,7 @@ export const useTasksStore = defineStore('tasks', () => {
 
   function setEditingTask(task: Task | null) {
     const newTask = toRaw(task)
-    if (newTask.id) {
+    if (newTask?.id) {
       editingTask.value = task
     }
   }

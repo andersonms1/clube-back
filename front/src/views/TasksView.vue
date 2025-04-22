@@ -12,53 +12,7 @@
       </div>
     </div>
 
-    <!-- Desktop View: Columns -->
-    <div v-if="!screenSize.isMobile" class="row q-col-gutter-md">
-      <div class="col-12 col-md-4">
-        <TaskColumn
-          title="Pending"
-          status="pending"
-          :tasks="tasksStore.pendingTasks"
-          :dragged-task="draggedTask"
-          @dragstart="onDragStart"
-          @dragend="onDragEnd"
-          @drop="onDrop"
-          @edit="openTaskDialog"
-          @delete="confirmDeleteTask"
-        />
-      </div>
-      
-      <div class="col-12 col-md-4">
-        <TaskColumn
-          title="In Progress"
-          status="in_progress"
-          :tasks="tasksStore.inProgressTasks"
-          :dragged-task="draggedTask"
-          @dragstart="onDragStart"
-          @dragend="onDragEnd"
-          @drop="onDrop"
-          @edit="openTaskDialog"
-          @delete="confirmDeleteTask"
-        />
-      </div>
-      
-      <div class="col-12 col-md-4">
-        <TaskColumn
-          title="Completed"
-          status="completed"
-          :tasks="tasksStore.completedTasks"
-          :dragged-task="draggedTask"
-          @dragstart="onDragStart"
-          @dragend="onDragEnd"
-          @drop="onDrop"
-          @edit="openTaskDialog"
-          @delete="confirmDeleteTask"
-        />
-      </div>
-    </div>
-
-    <!-- Mobile View: Tabs -->
-    <div v-else>
+    <div>
       <q-tabs
         v-model="activeTab"
         class="text-primary"
@@ -170,14 +124,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, toRaw } from 'vue';
 import { useTasksStore } from '@/stores';
-import { useScreenSize } from '@/composables';
-import { useDragDrop } from '@/composables';
-import { TaskCard, TaskColumn, TaskForm } from '@/components';
+import { TaskCard, TaskForm } from '@/components';
 import { Task, TaskCreate, TaskUpdate, TaskStatus } from '@/types';
 
 const tasksStore = useTasksStore();
-const screenSize = useScreenSize();
-const { draggedTask, onDragStart, onDragEnd, onDrop } = useDragDrop();
 const currentID = ref<string>('');
 // For mobile tabs
 const activeTab = ref<TaskStatus>('pending');
