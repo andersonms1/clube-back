@@ -7,7 +7,13 @@ services:
       - "80:80"
     volumes:
       - ./front:/app
-    command: npm run dev
+      - /app/node_modules
+    # command: npm run dev
+    depends_on:
+      - back
+    networks:
+      - app-network
+
   back:
     container_name: club-back
     build:
@@ -23,6 +29,10 @@ services:
     command: poetry run flask run --host=0.0.0.0 --port=5000 --debug
     depends_on:
       - mongo
+      - redis
+    networks:
+      - app-network
+
   mongo:
     container_name: club-database
     image: mongo
@@ -31,6 +41,10 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
       MONGO_INITDB_DATABASE: tasks_manager
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
 
   mongo-express:
     container_name: club-express
@@ -46,11 +60,25 @@ services:
       ME_CONFIG_MONGODB_AUTH_DATABASE: admin 
     depends_on:
       - mongo
+    networks:
+      - app-network
+
   redis:
+    container_name: club-redis
     image: redis:7.2-alpine
     restart: always
     command: "redis-server --requirepass ${DOCKER_REDIS_PASSWORD}"
     ports:
       - "6379:6379"
-    # volumes:
-    #   - "${DOCKER_REDIS_VOLUME_DATA}:/var/lib/redis"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  redis-data:

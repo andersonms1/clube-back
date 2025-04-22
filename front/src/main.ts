@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { Quasar } from 'quasar'
+import { Quasar, Notify } from 'quasar'
 import router from './router'
 
 // Import Quasar css
@@ -18,7 +18,16 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(Quasar, {
-  plugins: {}, // import Quasar plugins and add here
+  plugins: {
+    Notify
+  },
+  config: {
+    notify: {
+      position: 'top-right',
+      timeout: 3000,
+      textColor: 'white'
+    }
+  }
 })
 
 app.mount('#app')

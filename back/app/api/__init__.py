@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from .tasks import views as tasks_routes
 from .users import views as users_routes
 from .auth import views as auth_routes
@@ -19,6 +20,9 @@ def create_app(config_name="development"):
 
     # Set the environment in the app configuration
     app.config["ENV"] = config_name
+
+    # Enable CORS
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
     mongo = _init_mongodb(app)
     redis_client = init_redis(configuration)

@@ -78,6 +78,18 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function cleanCredentials() {
+    error.value = null;
+    // Clear state and localStorage
+    token.value = null;
+    user.value = null;
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    loading.value = false;
+  }
+
   async function logout() {
     loading.value = true;
     error.value = null;
@@ -89,14 +101,7 @@ export const useAuthStore = defineStore('auth', () => {
       // Even if API call fails, we still want to clear local state
       console.error('Logout API call failed:', err);
     } finally {
-      // Clear state and localStorage
-      token.value = null;
-      user.value = null;
-
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-
-      loading.value = false;
+      cleanCredentials()
     }
   }
 
@@ -148,6 +153,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     requestPasswordReset,
-    resetPassword
+    resetPassword,
+    cleanCredentials
   };
 });

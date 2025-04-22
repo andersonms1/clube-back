@@ -1,35 +1,24 @@
-# Build Stage
+# Imagem base com Node.js
 FROM node:22-alpine AS build
 
+# Diretório de trabalho
 WORKDIR /app
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy package.json and pnpm-lock.yaml
+# Copiar arquivos de configuração de dependências
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Install dependencies
+# Instalar dependências
 RUN pnpm install
-
-# Copy the rest of the application
+# Copiar o código fonte
 COPY . .
 
-# Build the application
-RUN pnpm run build
-
-# Production Stage
-FROM nginx:alpine
-
-# Copy the built app to nginx
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port 80
+# Expor a porta padrão do servidor de desenvolvimento Vite (5173)
+# Se estiver usando Vue CLI, a porta padrão seria 8080
 EXPOSE 80
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Comando para iniciar o servidor de desenvolvimento com hot-reload
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

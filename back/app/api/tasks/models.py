@@ -15,7 +15,7 @@ class TaskModel(BaseModel):
     descricao: str = Field(...)
     status: str = Field(...)
     data_vencimento: datetime = Field(...)
-    user_id: str
+    user_id: Optional[str]
 
     @field_serializer("data_vencimento")
     def serialize_dt(self, data_vencimento: datetime, _info):

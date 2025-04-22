@@ -73,15 +73,15 @@ class TaskService:
         return found_task
 
     def create_task(self, task: TaskModel):
+        user_id = get_jwt_identity()
+
         task_dict = task.dict(by_alias=True, exclude={"id"})
-        print(f"task_dict: {task_dict}")
+        task_dict["user_id"] = user_id
         result = self.collection.insert_one(task_dict)
-        print(f"result: {result}")
         created_task = self.collection.find_one({"_id": result.inserted_id})
-        print(f"created_task: {created_task}")
 
         # Invalidate cache for this user's tasks
-        user_id = task_dict.get("user_id")
+
         if user_id:
             cache_key = f"tasks:{user_id}"
             self.redis.delete(cache_key)

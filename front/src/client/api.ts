@@ -1,4 +1,7 @@
 import { ApiError } from '@/types';
+import { useAuthStore } from '@/stores/auth';
+import router from '@/router';
+import { Notify } from 'quasar';
 
 const API_URL = 'http://localhost:5000';
 
@@ -31,6 +34,24 @@ async function fetchApi<T>(
 
     // Check if the response is ok
     if (!response.ok) {
+      // Handle token expiration (401 Unauthorized)
+      if (response.status === 401) {
+        // Get auth store and handle logout
+        const authStore = useAuthStore();
+        // authStore.logout();
+        authStore.cleanCredentials();
+
+        // Show notification
+        Notify.create({
+          type: 'warning',
+          message: 'Your session has expired. Please log in again.',
+          icon: 'warning'
+        });
+
+        // Redirect to login page
+        router.push('/login');
+      }
+
       throw {
         message: data.message || 'An error occurred',
         status: response.status,
