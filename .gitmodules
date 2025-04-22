@@ -1,0 +1,3 @@
+[submodule "club-front"]
+	path = club-front
+	url = git@gitlab.com:anderson-silva/club-front.git
