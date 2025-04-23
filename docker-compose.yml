@@ -2,11 +2,11 @@ services:
   web:
     container_name: club-front
     build: 
-      context: ./front/
+      context: ./club-front/
     ports:
       - "80:80"
     volumes:
-      - ./front:/app
+      - ./club-front:/app
       - /app/node_modules
     # command: npm run dev
     env_file:
