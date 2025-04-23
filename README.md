@@ -33,3 +33,4 @@ E crie o repositorio do front da aplicação
 
 Acesse no navegador o endereço `https://localhost:80`
 
+![plot](Mockup.png)
