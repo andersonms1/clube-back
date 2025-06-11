@@ -1,6 +1,5 @@
-from app.api import create_app
 import os
-
+from app import create_app
 env = os.getenv("ENV", "development")
 
 app = create_app(env)

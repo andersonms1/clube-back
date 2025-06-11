@@ -4,8 +4,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from bson import ObjectId
 import bcrypt
 from .models import UserModel, UserResponse
-from app.infrastructure.database.mongodb import MongoDB
-from app.infrastructure.redis.rediscache import RedisCache
+from app.lib.database.mongodb import MongoDB
+from app.lib.redis.rediscache import RedisCache
 
 
 class UserResource(Resource):

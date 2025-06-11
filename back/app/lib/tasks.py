@@ -1,8 +1,8 @@
 from bson import ObjectId
 from app.api.tasks.models import TaskModel, TaskUpdateModel
-from app.infrastructure.database.mongodb import MongoDB
+from app.lib.database.mongodb import MongoDB
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.infrastructure.redis.rediscache import RedisCache
+from app.lib.redis.rediscache import RedisCache
 import json
 import datetime
 import logging

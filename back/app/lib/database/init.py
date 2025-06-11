@@ -1,4 +1,4 @@
-from app.infrastructure.database.mongodb import MongoDB
+from app.lib.database.mongodb import MongoDB
 
 
 def init_mongodb(config):

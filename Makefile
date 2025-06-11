@@ -12,3 +12,5 @@ up-back:
 	docker compose up back mongo redis -d
 up-express:
 	docker compose up mongo-express -d
+up:
+	docker compose up web -d

@@ -8,7 +8,7 @@ from flask_restful import Resource
 from bson.errors import InvalidId
 
 from app.api.tasks.models import TaskModel, TaskUpdateModel
-from app.api.tasks.services import TaskService
+from app.lib.tasks import TaskService
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import traceback
 

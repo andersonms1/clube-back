@@ -4,10 +4,10 @@ from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required
 from bson import ObjectId
-from . import services
+from ...lib import mail
 from .models import PasswordResetModel
-from app.infrastructure.database.mongodb import MongoDB
-from app.infrastructure.redis.rediscache import RedisCache
+from app.lib.database.mongodb import MongoDB
+from app.lib.redis.rediscache import RedisCache
 import traceback
 import logging
 
@@ -112,7 +112,7 @@ class PasswordResetRequestResource(Resource):
             self.redis.set(redis_key, user_id, "PASSWORD_RESET_TOKEN_EXPIRES")
 
             # Enviar email
-            if services.send_password_reset_email(email, reset_token):
+            if mail.send_password_reset_email(email, reset_token):
                 return {
                     "message": "Se seu email estiver registrado, você receberá um link para redefinir sua senha"
                 }, 200

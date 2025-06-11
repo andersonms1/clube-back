@@ -1,4 +1,4 @@
-from app.infrastructure.redis.rediscache import RedisCache
+from app.lib.redis.rediscache import RedisCache
 
 
 def init_redis(config):
